@@ -28,17 +28,27 @@ app.layout = html.Div([
         placeholder ='Select Players Nationality...',
         multi = True
     ),
+    dcc.Slider(
+        id = 'overall_slider',
+        min = df['Overall'].min(),
+        max = df['Overall'].max(),
+        value = df['Overall'].max(),
+        marks = {str(overall): str(overall) for overall in df['Overall'].unique()}
+    ),
     html.H1("Players Overall vs. Age"),
     dcc.Graph(id = 'test-graph')
 ])
 
 @app.callback(
-
     dash.dependencies.Output('test-graph', 'figure'),
-    [dash.dependencies.Input('nationality-picker','value')])
+    [dash.dependencies.Input('nationality-picker','value'),
+     dash.dependencies.Input('overall_slider','value')])
 
-def update_players(picked_nations):
-    filtered_df = df[(df['Nationality'].isin(picked_nations)) & (df['Overall'] > 80)]
+def update_players(nat_picker, over_slide):
+    if nat_picker is None or nat_picker == "":
+        filtered_df = df[(df['Nationality'].isin([nationality for nationality in df[df['Overall'] > 80].Nationality.unique()])) & (df['Overall'] == over_slide)]
+    else:
+        filtered_df = df[(df['Nationality'].isin(nat_picker)) & (df['Overall'] == over_slide)]
     
     return{
         'data': [
